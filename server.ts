@@ -1,16 +1,11 @@
 import express from "express";
 import path from "path";
-import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import { FallbackDatabase } from "./server/fallbackPrompts";
-import { ensureIconsExist } from "./src/server/generateIcons";
 
 dotenv.config();
-
-// Ensure iOS Safari Apple Touch icons & manifest exist on startup
-ensureIconsExist();
 
 const app = express();
 const PORT = 3000;
@@ -262,46 +257,7 @@ app.get("/api/daily-prompt", async (req, res) => {
 });
 
 async function startServer() {
-  // Ensure icon PNG files and manifest are generated on server start
-  ensureIconsExist();
-
   const publicPath = path.join(process.cwd(), "public");
-
-  // Explicit handlers for iOS Safari and Home Screen bookmarks
-  app.get(["/apple-touch-icon.png", "/apple-touch-icon-precomposed.png", "/icon-192.png", "/icon-512.png", "/favicon.png"], (req, res) => {
-    const filename = req.path.replace("/", "") || "apple-touch-icon.png";
-    const filePath = path.join(publicPath, filename);
-    if (fs.existsSync(filePath)) {
-      res.setHeader("Content-Type", "image/png");
-      res.setHeader("Cache-Control", "public, max-age=86400");
-      res.sendFile(filePath);
-    } else {
-      res.status(404).end();
-    }
-  });
-
-  app.get("/icon.svg", (req, res) => {
-    const filePath = path.join(publicPath, "icon.svg");
-    if (fs.existsSync(filePath)) {
-      res.setHeader("Content-Type", "image/svg+xml");
-      res.setHeader("Cache-Control", "public, max-age=86400");
-      res.sendFile(filePath);
-    } else {
-      res.status(404).end();
-    }
-  });
-
-  app.get("/manifest.json", (req, res) => {
-    const filePath = path.join(publicPath, "manifest.json");
-    if (fs.existsSync(filePath)) {
-      res.setHeader("Content-Type", "application/json");
-      res.sendFile(filePath);
-    } else {
-      res.status(404).end();
-    }
-  });
-
-  // Always serve public directory assets
   app.use(express.static(publicPath));
 
   if (process.env.NODE_ENV !== "production") {

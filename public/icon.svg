@@ -15,30 +15,30 @@
   </defs>
 
   <!-- Dark Squircle Background -->
-  <rect width="512" height="512" rx="108" fill="url(#bgGlow)"/>
+  <rect width="512" height="512" rx="108" fill="#09090b"/>
   
-  <!-- Subtle Inner Border -->
-  <rect x="6" y="6" width="500" height="500" rx="102" fill="none" stroke="#27272a" stroke-width="4"/>
+  <!-- Subtle Inner Glow Border -->
+  <rect x="6" y="6" width="500" height="500" rx="102" fill="none" stroke="#27272a" stroke-width="4" opacity="0.8"/>
 
-  <!-- DrawMuse Pencil Nib / Artist Feather Motif -->
+  <!-- High-Contrast Vibrant Visual Vector Artwork (DrawMuse Pencil & Muse Sparkle Star) -->
   <g transform="translate(10, 10)">
-    <!-- Main Stylized Diagonal Quill/Pencil Blade -->
+    <!-- Stylized Diagonal Quill/Pencil Blade -->
     <path d="M140 370 L190 410 L350 200 C370 174 380 130 380 130 C380 130 336 140 310 160 L140 370 Z" fill="url(#penBody)"/>
     
     <!-- Metallic Nib Tip -->
     <path d="M140 370 L110 420 L190 410 Z" fill="#F7F4EE"/>
     
     <!-- Slit in Nib -->
-    <line x1="150" y1="415" x2="220" y2="325" stroke="#18181b" stroke-width="4" stroke-linecap="round"/>
-    <circle cx="220" cy="325" r="5" fill="#18181b"/>
+    <line x1="150" y1="415" x2="220" y2="325" stroke="#09090b" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="220" cy="325" r="5" fill="#09090b"/>
 
-    <!-- Gold Accent Swirl Line -->
-    <path d="M110 420 Q180 340 310 160" stroke="#F5C06B" stroke-width="3" stroke-dasharray="8 6" opacity="0.6"/>
+    <!-- Gold Accent Swirl -->
+    <path d="M110 420 Q180 340 310 160" stroke="#F5C06B" stroke-width="3" stroke-dasharray="8 6" opacity="0.7"/>
 
-    <!-- Vibrant 4-Point Sparkle Star (Top-Right Muse Sparkle) -->
+    <!-- Vibrant 4-Point Muse Sparkle Star (Top-Right) -->
     <path d="M380 140 C380 100 390 90 430 90 C390 90 380 80 380 40 C380 80 370 90 330 90 C370 90 380 100 380 140 Z" fill="url(#goldStar)"/>
 
-    <!-- Secondary Small Sparkle -->
-    <path d="M280 100 C280 80 285 75 305 75 C285 75 280 70 280 50 C280 70 275 75 255 75 C275 75 280 80 280 100 Z" fill="#F7F4EE" opacity="0.85"/>
+    <!-- Secondary Ivory Sparkle -->
+    <path d="M280 100 C280 80 285 75 305 75 C285 75 280 70 280 50 C280 70 275 75 255 75 C275 75 280 80 280 100 Z" fill="#F7F4EE" opacity="0.9"/>
   </g>
 </svg>
