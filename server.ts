@@ -261,6 +261,10 @@ app.get("/api/daily-prompt", async (req, res) => {
 });
 
 async function startServer() {
+  // Always serve public directory assets (icon.svg, manifest.json, etc.)
+  const publicPath = path.join(process.cwd(), "public");
+  app.use(express.static(publicPath));
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },

@@ -1,0 +1,22 @@
+{
+  "short_name": "DrawMuse",
+  "name": "DrawMuse — Prompt Studio",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512 192x192 64x64 32x32",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "orientation": "portrait"
+}
