@@ -121,7 +121,7 @@ app.post("/api/generate-prompt", async (req, res) => {
     });
   } catch (error: any) {
     console.info("Gemini API quota or network limit reached (using fallback prompt engine):", error?.status || error?.message || "Quota limit");
-    const fallback = FallbackDatabase.getRandomPrompt(req.body.category, req.body.filters);
+    const fallback = FallbackDatabase.getRandomPrompt(req.body.category, req.body.filters, req.body.lengthPreference, req.body.wheelState);
     res.json({
       prompt: fallback.prompt,
       title: fallback.title,

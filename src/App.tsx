@@ -165,7 +165,7 @@ export default function App() {
 
       if (!data || !data.prompt) {
         // Fallback to client prompt engine if server API returns non-JSON or fails
-        const clientData = generateClientPrompt(cat, filters);
+        const clientData = generateClientPrompt(cat, filters, settings.promptLength);
         data = {
           title: clientData.title,
           prompt: clientData.prompt,
@@ -187,7 +187,7 @@ export default function App() {
       setHistory((prev) => [newPrompt, ...prev]);
     } catch (err: any) {
       console.error('Error generating prompt, using client fallback:', err);
-      const clientData = generateClientPrompt(cat, filters);
+      const clientData = generateClientPrompt(cat, filters, settings.promptLength);
       const fallbackPrompt: DrawingPrompt = {
         id: `prompt-${Date.now()}`,
         title: clientData.title,
