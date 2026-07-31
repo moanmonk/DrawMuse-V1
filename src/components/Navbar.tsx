@@ -87,33 +87,35 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </header>
 
-      {/* Floating Bottom Navigation Bar */}
-      <nav className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-lg bg-[var(--bg-card)]/95 backdrop-blur-xl border border-[var(--border-subtle)] shadow-2xl rounded-2xl p-1.5 flex items-center justify-around">
-        {bottomNavItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`relative flex flex-col items-center justify-center py-2 px-3 sm:px-4 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer ${
-                isActive
-                  ? 'text-[var(--bg-main)] bg-[var(--text-main)] font-semibold shadow-xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)]'
-              }`}
-            >
-              <div className="relative">
-                <Icon className="w-4 h-4 mb-0.5" />
-                {item.badge !== null && item.badge !== undefined && (
-                  <span className="absolute -top-1.5 -right-2 px-1.2 py-0.2 rounded-full text-[9px] font-mono bg-[var(--accent-terracotta)] text-white font-bold">
-                    {item.badge}
-                  </span>
-                )}
-              </div>
-              <span className="text-[10px] tracking-wide font-sans">{item.label}</span>
-            </button>
-          );
-        })}
+      {/* Grounded Bottom Navigation Dock */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 w-full bg-[var(--bg-card)]/98 backdrop-blur-2xl border-t border-[var(--border-subtle)] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] py-2 px-3 sm:px-6">
+        <div className="max-w-lg mx-auto flex items-center justify-around">
+          {bottomNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`relative flex flex-col items-center justify-center py-1.5 px-3 sm:px-5 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer ${
+                  isActive
+                    ? 'text-[var(--bg-main)] bg-[var(--text-main)] font-semibold shadow-xs scale-102'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)]'
+                }`}
+              >
+                <div className="relative">
+                  <Icon className="w-4 h-4 mb-0.5" />
+                  {item.badge !== null && item.badge !== undefined && (
+                    <span className="absolute -top-1.5 -right-2 px-1.5 py-0.2 rounded-full text-[9px] font-mono bg-[var(--accent-terracotta)] text-white font-bold shadow-xs">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] tracking-tight font-sans font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
     </>
   );

@@ -4,8 +4,12 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import { FallbackDatabase } from "./server/fallbackPrompts";
+import { ensureIconsExist } from "./src/server/generateIcons";
 
 dotenv.config();
+
+// Ensure iOS Safari Apple Touch icons & manifest exist on startup
+ensureIconsExist();
 
 const app = express();
 const PORT = 3000;

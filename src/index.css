@@ -6,31 +6,33 @@
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     
-    --bg-main: #FAF9F6;
-    --bg-surface: #F2F0EC;
-    --bg-card: #FFFFFF;
-    --border-subtle: #E8E5DF;
-    --text-main: #262524;
-    --text-muted: #6B6966;
+    --bg-main: #F7F4EE;
+    --bg-surface: #EDE7DC;
+    --bg-card: #FAF8F3;
+    --border-subtle: #DFD7C8;
+    --text-main: #24201D;
+    --text-muted: #6E675E;
     --accent-terracotta: #C85A32;
-    --accent-sage: #788A78;
-    --accent-forest: #1B3B2B;
-    --accent-clay: #D8C3B5;
-    --accent-dustyblue: #687B8C;
+    --accent-sage: #6B826D;
+    --accent-warmgold: #D49A3D;
+    --accent-forest: #224233;
+    --accent-clay: #C59F89;
+    --accent-dustyblue: #526E85;
   }
 
   .dark {
-    --bg-main: #141413;
-    --bg-surface: #1E1E1C;
-    --bg-card: #252523;
-    --border-subtle: #2E2E2B;
-    --text-main: #F5F4F0;
-    --text-muted: #A3A09A;
-    --accent-terracotta: #D96B43;
-    --accent-sage: #8A9C8A;
-    --accent-forest: #2E523F;
-    --accent-clay: #C2AEA0;
-    --accent-dustyblue: #7C91A3;
+    --bg-main: #161412;
+    --bg-surface: #221E1A;
+    --bg-card: #2A2621;
+    --border-subtle: #3A342C;
+    --text-main: #F7F4EE;
+    --text-muted: #A8A095;
+    --accent-terracotta: #E0734C;
+    --accent-sage: #829B85;
+    --accent-warmgold: #E5B25D;
+    --accent-forest: #315C47;
+    --accent-clay: #C89F8C;
+    --accent-dustyblue: #6E8CA8;
   }
 
   body {
