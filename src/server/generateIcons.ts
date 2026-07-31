@@ -9,25 +9,32 @@ export function ensureIconsExist() {
   }
 
   const appleTouchPath = path.join(publicDir, 'apple-touch-icon.png');
+  const appleTouchPrecomposedPath = path.join(publicDir, 'apple-touch-icon-precomposed.png');
+  const icon192Path = path.join(publicDir, 'icon-192.png');
   const icon512Path = path.join(publicDir, 'icon-512.png');
   const faviconPngPath = path.join(publicDir, 'favicon.png');
+  const faviconIcoPath = path.join(publicDir, 'favicon.ico');
 
-  // Always regenerate to guarantee icon is present
+  // Generate PNG icons for iOS Safari and PWAs
   generateAppIconPNG(appleTouchPath, 180);
+  generateAppIconPNG(appleTouchPrecomposedPath, 180);
+  generateAppIconPNG(icon192Path, 192);
   generateAppIconPNG(icon512Path, 512);
   generateAppIconPNG(faviconPngPath, 64);
+  generateAppIconPNG(faviconIcoPath, 64);
 
-  // Write PWA manifest.json
+  // Write PWA manifest.json referencing PNG and SVG
   const manifestPath = path.join(publicDir, 'manifest.json');
   const manifestContent = JSON.stringify(
     {
-      name: 'DrawMuse — Prompt Studio',
       short_name: 'DrawMuse',
+      name: 'DrawMuse — Prompt Studio',
       description: 'Inspiring drawing prompts for digital and traditional artists.',
       start_url: '/',
       display: 'standalone',
-      background_color: '#161412',
-      theme_color: '#161412',
+      background_color: '#09090b',
+      theme_color: '#09090b',
+      orientation: 'portrait',
       icons: [
         {
           src: '/apple-touch-icon.png',
@@ -36,9 +43,20 @@ export function ensureIconsExist() {
           purpose: 'any maskable'
         },
         {
+          src: '/icon-192.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'any maskable'
+        },
+        {
           src: '/icon-512.png',
           sizes: '512x512',
           type: 'image/png'
+        },
+        {
+          src: '/icon.svg',
+          sizes: '512x512',
+          type: 'image/svg+xml'
         }
       ]
     },
@@ -52,59 +70,64 @@ function generateAppIconPNG(outputPath: string, size: number) {
   const png = new PNG({ width: size, height: size });
 
   // Color Definitions (RGBA)
-  const bgR = 0x16, bgG = 0x14, bgB = 0x12, bgA = 0xFF; // Dark Warm Charcoal #161412
-  const innerR = 0x24, innerG = 0x20, innerB = 0x1D; // Card Surface #24201D
-  const terraR = 0xC8, terraG = 0x5A, terraB = 0x32; // Terracotta #C85A32
-  const goldR = 0xD4, goldG = 0x9A, goldB = 0x3D; // Amber Gold #D49A3D
+  const bgR = 0x09, bgG = 0x09, bgB = 0x0B, bgA = 0xFF; // Dark Zinc #09090b
+  const cardR = 0x1A, cardG = 0x18, cardB = 0x16; // Warm Charcoal Card #1a1816
+  const terraR = 0xE0, terraG = 0x73, terraB = 0x4C; // Bright Terracotta #E0734C
+  const goldR = 0xF5, goldG = 0xC0, goldB = 0x6B; // Gold Sparkle #F5C06B
   const whiteR = 0xF7, whiteG = 0xF4, whiteB = 0xEE; // Soft Ivory #F7F4EE
 
   const center = size / 2;
-  const radius = size * 0.44;
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const idx = (size * y + x) << 2;
 
-      // Default fill: dark charcoal
+      // Default dark fill
       let r = bgR, g = bgG, b = bgB, a = bgA;
 
-      // Subtle inner rounded container
-      const dx = Math.abs(x - center);
-      const dy = Math.abs(y - center);
+      const dx = x - center;
+      const dy = y - center;
 
-      if (dx < radius && dy < radius) {
-        r = innerR; g = innerG; b = innerB;
+      // Inner Squircle / Rounded Card Area
+      const cornerRadius = size * 0.22;
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(dy);
+      const boxSize = size * 0.42;
+
+      if (absDx < boxSize && absDy < boxSize) {
+        // Simple rounded box formula
+        const cornerDx = Math.max(0, absDx - (boxSize - cornerRadius));
+        const cornerDy = Math.max(0, absDy - (boxSize - cornerRadius));
+        if (cornerDx * cornerDx + cornerDy * cornerDy < cornerRadius * cornerRadius) {
+          r = cardR; g = cardG; b = cardB;
+        }
       }
 
-      // Draw Center Star/Pencil Nib Motif
-      // 1. Draw Terracotta Diagonal Pencil Blade (Bottom Left to Top Right)
-      const px = x - center;
-      const py = y - center;
-
-      // Main diagonal bar
-      const perpDist = Math.abs(px + py) / Math.SQRT2;
-      const projDist = (px - py) / Math.SQRT2;
-
-      const barWidth = size * 0.12;
+      // Pencil Nib Body (Diagonal Terracotta Stripe)
+      const perpDist = Math.abs(dx + dy) / Math.SQRT2;
+      const projDist = (dx - dy) / Math.SQRT2;
+      const barWidth = size * 0.11;
       const barLen = size * 0.28;
 
       if (perpDist < barWidth && Math.abs(projDist) < barLen) {
         r = terraR; g = terraG; b = terraB;
       }
 
-      // 2. Draw Golden 4-Point Sparkle Star in Top Right
-      const starCx = size * 0.62;
-      const starCy = size * 0.38;
-      const sdx = Math.abs(x - starCx);
-      const sdy = Math.abs(y - starCy);
-      const starRadius = size * 0.16;
+      // Sparkle Star (Gold 4-Point Star in Top Right)
+      const starCx = size * 0.16;
+      const starCy = -size * 0.16;
+      const sdx = Math.abs(dx - starCx);
+      const sdy = Math.abs(dy - starCy);
+      const starRadius = size * 0.14;
 
       if (sdx + sdy < starRadius) {
         r = goldR; g = goldG; b = goldB;
       }
 
-      // 3. Crisp Ivory Accent Point in Center
-      if (dx < size * 0.04 && dy < size * 0.04) {
+      // Nib Tip Ivory Highlight (Bottom Left)
+      const tipCx = -size * 0.16;
+      const tipCy = size * 0.16;
+      if (Math.hypot(dx - tipCx, dy - tipCy) < size * 0.05) {
         r = whiteR; g = whiteG; b = whiteB;
       }
 
@@ -118,3 +141,4 @@ function generateAppIconPNG(outputPath: string, size: number) {
   const buffer = PNG.sync.write(png);
   fs.writeFileSync(outputPath, buffer);
 }
+
