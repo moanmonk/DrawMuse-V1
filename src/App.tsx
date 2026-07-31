@@ -10,6 +10,27 @@ import { ExportCardModal } from './components/ExportCardModal';
 import { SettingsModal } from './components/SettingsModal';
 import { AboutModal } from './components/AboutModal';
 import { DrawingPrompt, PromptFilters, AppSettings } from './types';
+import { generateClientPrompt, getClientDailyPrompt } from './utils/clientPrompts';
+
+async function safeFetchJson<T = any>(url: string, options?: RequestInit): Promise<T | null> {
+  try {
+    const res = await fetch(url, options);
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return null;
+    }
+    const text = await res.text();
+    if (!text || (!text.trim().startsWith('{') && !text.trim().startsWith('['))) {
+      return null;
+    }
+    const data = JSON.parse(text);
+    if (!res.ok) return null;
+    return data;
+  } catch (err) {
+    console.warn(`API call to ${url} returned non-JSON or failed, using client fallback:`, err);
+    return null;
+  }
+}
 
 export default function App() {
   // Navigation & UI Modal States
@@ -97,26 +118,24 @@ export default function App() {
   // Fetch Daily Featured Prompt on Mount
   useEffect(() => {
     const fetchDaily = async () => {
-      try {
-        const res = await fetch('/api/daily-prompt');
-        const data = await res.json();
-
-        const dailyItem: DrawingPrompt = {
-          id: `daily-${data.date}`,
-          title: data.title,
-          text: data.prompt,
-          category: data.category || 'Daily Spotlight',
-          filters: {},
-          createdAt: Date.now(),
-          isFavorite: favorites.some((f) => f.id === `daily-${data.date}`),
-          isDaily: true,
-          dailyDate: data.date,
-        };
-
-        setDailyPrompt(dailyItem);
-      } catch (err) {
-        console.error('Failed to load daily prompt:', err);
+      let data = await safeFetchJson('/api/daily-prompt');
+      if (!data) {
+        data = getClientDailyPrompt();
       }
+
+      const dailyItem: DrawingPrompt = {
+        id: `daily-${data.date}`,
+        title: data.title,
+        text: data.prompt,
+        category: data.category || 'Daily Spotlight',
+        filters: {},
+        createdAt: Date.now(),
+        isFavorite: favorites.some((f) => f.id === `daily-${data.date}`),
+        isDaily: true,
+        dailyDate: data.date,
+      };
+
+      setDailyPrompt(dailyItem);
     };
 
     fetchDaily();
@@ -134,7 +153,7 @@ export default function App() {
     setActiveTab('generator');
 
     try {
-      const res = await fetch('/api/generate-prompt', {
+      let data = await safeFetchJson('/api/generate-prompt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -144,8 +163,15 @@ export default function App() {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to generate prompt');
+      if (!data || !data.prompt) {
+        // Fallback to client prompt engine if server API returns non-JSON or fails
+        const clientData = generateClientPrompt(cat, filters);
+        data = {
+          title: clientData.title,
+          prompt: clientData.prompt,
+          category: clientData.category,
+        };
+      }
 
       const newPrompt: DrawingPrompt = {
         id: `prompt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -160,8 +186,19 @@ export default function App() {
       setActivePrompt(newPrompt);
       setHistory((prev) => [newPrompt, ...prev]);
     } catch (err: any) {
-      console.error('Error generating prompt:', err);
-      alert(err.message || 'Error generating prompt. Please check network.');
+      console.error('Error generating prompt, using client fallback:', err);
+      const clientData = generateClientPrompt(cat, filters);
+      const fallbackPrompt: DrawingPrompt = {
+        id: `prompt-${Date.now()}`,
+        title: clientData.title,
+        text: clientData.prompt,
+        category: clientData.category,
+        filters: { ...filters },
+        createdAt: Date.now(),
+        isFavorite: false,
+      };
+      setActivePrompt(fallbackPrompt);
+      setHistory((prev) => [fallbackPrompt, ...prev]);
     } finally {
       setIsLoading(false);
     }
@@ -173,7 +210,7 @@ export default function App() {
     setIsRemixing(true);
 
     try {
-      const res = await fetch('/api/remix-prompt', {
+      let data = await safeFetchJson('/api/remix-prompt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -183,8 +220,19 @@ export default function App() {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to remix prompt');
+      if (!data || !data.prompt) {
+        const twists = [
+          'in a bright futuristic cyberpunk city with vibrant neon lights and rain puddles.',
+          'underwater with clear sunbeams streaming through deep blue ocean water.',
+          'on a snowy mountain peak under a glowing starry night sky.',
+          'with warm candlelight and soft atmospheric shadows.',
+        ];
+        const randomTwist = twists[Math.floor(Math.random() * twists.length)];
+        data = {
+          title: 'Remixed Concept',
+          prompt: `${activePrompt.text} — Reimagined ${randomTwist}`,
+        };
+      }
 
       const remixedPrompt: DrawingPrompt = {
         id: `remix-${Date.now()}`,
@@ -202,7 +250,6 @@ export default function App() {
       setHistory((prev) => [remixedPrompt, ...prev]);
     } catch (err: any) {
       console.error('Error remixing:', err);
-      alert(err.message || 'Failed to remix prompt.');
     } finally {
       setIsRemixing(false);
     }
@@ -214,7 +261,7 @@ export default function App() {
     setIsExpanding(true);
 
     try {
-      const res = await fetch('/api/expand-prompt', {
+      let data = await safeFetchJson('/api/expand-prompt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -222,8 +269,11 @@ export default function App() {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to expand prompt');
+      if (!data || !data.prompt) {
+        data = {
+          prompt: `${activePrompt.text}\n\nArtistic Details: Focus on atmospheric depth, soft ambient lighting, clean focal points, and rich environmental textures.`,
+        };
+      }
 
       const expandedPrompt: DrawingPrompt = {
         ...activePrompt,
@@ -235,7 +285,6 @@ export default function App() {
       setHistory((prev) => [expandedPrompt, ...prev.filter((p) => p.id !== activePrompt.id)]);
     } catch (err: any) {
       console.error('Error expanding:', err);
-      alert(err.message || 'Failed to expand prompt.');
     } finally {
       setIsExpanding(false);
     }
