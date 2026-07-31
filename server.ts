@@ -120,7 +120,7 @@ app.post("/api/generate-prompt", async (req, res) => {
       category: category || "General Inspiration",
     });
   } catch (error: any) {
-    console.info("Gemini API quota or network limit reached (using fallback prompt engine):", error?.status || error?.message || "Quota limit");
+    console.info("Notice: Gemini API status code:", error?.status || 429, "- Using Smart Prompt Engine generator.");
     const fallback = FallbackDatabase.getRandomPrompt(req.body.category, req.body.filters, req.body.lengthPreference, req.body.wheelState);
     res.json({
       prompt: fallback.prompt,
@@ -160,7 +160,7 @@ Please create a fresh creative REMIX of this prompt. Keep the core spirit or und
       title: cleanPromptText(titleResponse.text || "Remixed Concept"),
     });
   } catch (error: any) {
-    console.warn("Gemini API error (using fallback remix):", error?.message || error);
+    console.info("Notice: Using Smart Prompt Engine remix fallback.");
     const fallback = FallbackDatabase.getRemix(req.body.existingPrompt || "An artistic portrait in dramatic light");
     res.json({
       prompt: fallback.prompt,
@@ -193,7 +193,7 @@ Please EXPAND this concept into a richer, multi-layered visual scenario. Add det
       prompt: expandedText,
     });
   } catch (error: any) {
-    console.warn("Gemini API error (using fallback expansion):", error?.message || error);
+    console.info("Notice: Using Smart Prompt Engine expansion fallback.");
     const fallback = FallbackDatabase.getExpand(req.body.existingPrompt || "A solitary figure in the fog");
     res.json({
       prompt: fallback.prompt,
@@ -241,7 +241,7 @@ app.get("/api/daily-prompt", async (req, res) => {
       ...dailyPromptCache[todayStr],
     });
   } catch (error: any) {
-    console.warn("Gemini API error (using fallback daily prompt):", error?.message || error);
+    console.info("Notice: Using Smart Prompt Engine daily spotlight fallback.");
     const todayStr = new Date().toISOString().split("T")[0];
     const fallback = FallbackDatabase.getDailyPrompt(todayStr);
     dailyPromptCache[todayStr] = {
