@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    --bg-main: #FAF9F6;
+    --bg-surface: #F2F0EC;
+    --bg-card: #FFFFFF;
+    --border-subtle: #E8E5DF;
+    --text-main: #262524;
+    --text-muted: #6B6966;
+    --accent-terracotta: #C85A32;
+    --accent-sage: #788A78;
+    --accent-forest: #1B3B2B;
+    --accent-clay: #D8C3B5;
+    --accent-dustyblue: #687B8C;
+  }
+
+  .dark {
+    --bg-main: #141413;
+    --bg-surface: #1E1E1C;
+    --bg-card: #252523;
+    --border-subtle: #2E2E2B;
+    --text-main: #F5F4F0;
+    --text-muted: #A3A09A;
+    --accent-terracotta: #D96B43;
+    --accent-sage: #8A9C8A;
+    --accent-forest: #2E523F;
+    --accent-clay: #C2AEA0;
+    --accent-dustyblue: #7C91A3;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    letter-spacing: -0.011em;
+  }
+}
+
+.font-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-sans {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+}
+
+/* Editorial Canvas Card */
+.editorial-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.5rem;
+  transition: all 0.25s ease;
+}
+
+.editorial-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.05);
+}
+
+.dark .editorial-card:hover {
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom Editorial Button */
+.editorial-btn-primary {
+  background-color: var(--text-main);
+  color: var(--bg-main);
+  border-radius: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.editorial-btn-primary:hover {
+  opacity: 0.92;
+  transform: scale(1.01);
+}
+
+.editorial-btn-secondary {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.editorial-btn-secondary:hover {
+  background-color: var(--border-subtle);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 120, 0.4);
+}
