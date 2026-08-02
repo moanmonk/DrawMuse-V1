@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { DrawingPrompt } from '../types';
-import { Heart, Search, Trash2, Copy, Share2, RefreshCw, Check, ArrowRight } from 'lucide-react';
+import { Heart, Search, Trash2, Copy, Share2, RefreshCw, Check } from 'lucide-react';
 
 interface FavoritesViewProps {
   favorites: DrawingPrompt[];
@@ -97,67 +98,83 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filteredFavorites.map((item) => (
-          <div
-            key={item.id}
-            className="editorial-card p-6 flex flex-col justify-between space-y-4"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--accent-terracotta)] font-bold">
-                  {item.category}
-                </span>
-                <span className="text-[10px] font-mono text-[var(--text-muted)]">
-                  {new Date(item.createdAt).toLocaleDateString()}
-                </span>
+        <AnimatePresence mode="popLayout">
+          {filteredFavorites.map((item) => (
+            <motion.div
+              layout
+              key={item.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.25 }}
+              whileHover={{ y: -3 }}
+              className="editorial-card p-6 flex flex-col justify-between space-y-4"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--accent-terracotta)] font-bold">
+                    {item.category}
+                  </span>
+                  <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                    {new Date(item.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <h4 className="font-serif text-xl font-bold text-[var(--text-main)] mb-2">
+                  {item.title}
+                </h4>
+
+                <p className="font-serif italic text-sm text-[var(--text-main)] leading-relaxed opacity-90">
+                  "{item.text}"
+                </p>
               </div>
 
-              <h4 className="font-serif text-xl font-bold text-[var(--text-main)] mb-2">
-                {item.title}
-              </h4>
-
-              <p className="font-serif italic text-sm text-[var(--text-main)] leading-relaxed opacity-90">
-                "{item.text}"
-              </p>
-            </div>
-
-            <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2">
-              <button
-                onClick={() => onRemixPrompt(item)}
-                className="text-xs font-semibold text-[var(--text-main)] hover:text-[var(--accent-terracotta)] flex items-center gap-1.5 cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Draw / Remix</span>
-              </button>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleCopy(item)}
-                  title="Copy prompt text"
-                  className="p-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)] cursor-pointer"
+              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => onRemixPrompt(item)}
+                  className="text-xs font-semibold text-[var(--text-main)] hover:text-[var(--accent-terracotta)] flex items-center gap-1.5 cursor-pointer"
                 >
-                  {copiedId === item.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Draw / Remix</span>
+                </motion.button>
 
-                <button
-                  onClick={() => onOpenExport(item)}
-                  title="Export PNG card"
-                  className="p-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)] cursor-pointer"
-                >
-                  <Share2 className="w-3.5 h-3.5 text-[var(--accent-terracotta)]" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleCopy(item)}
+                    title="Copy prompt text"
+                    className="p-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)] cursor-pointer"
+                  >
+                    {copiedId === item.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  </motion.button>
 
-                <button
-                  onClick={() => onToggleFavorite(item.id)}
-                  title="Remove from favorites"
-                  className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/30 cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => onOpenExport(item)}
+                    title="Export PNG card"
+                    className="p-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)] cursor-pointer"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-[var(--accent-terracotta)]" />
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => onToggleFavorite(item.id)}
+                    title="Remove from favorites"
+                    className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/30 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </motion.button>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );

@@ -181,6 +181,7 @@ export default function App() {
         filters: { ...filters },
         createdAt: Date.now(),
         isFavorite: false,
+        provider: data.provider || 'DrawMuse Smart Offline Engine',
       };
 
       setActivePrompt(newPrompt);
@@ -196,6 +197,7 @@ export default function App() {
         filters: { ...filters },
         createdAt: Date.now(),
         isFavorite: false,
+        provider: 'DrawMuse Smart Offline Engine',
       };
       setActivePrompt(fallbackPrompt);
       setHistory((prev) => [fallbackPrompt, ...prev]);
@@ -231,6 +233,7 @@ export default function App() {
         data = {
           title: 'Remixed Concept',
           prompt: `${activePrompt.text} — Reimagined ${randomTwist}`,
+          provider: 'DrawMuse Smart Offline Engine',
         };
       }
 
@@ -244,6 +247,7 @@ export default function App() {
         isFavorite: false,
         remixCount: (activePrompt.remixCount || 0) + 1,
         sourcePromptId: activePrompt.id,
+        provider: data.provider || activePrompt.provider,
       };
 
       setActivePrompt(remixedPrompt);

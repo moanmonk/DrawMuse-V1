@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { DrawingPrompt } from '../types';
 import { Download, X, Image as ImageIcon, Check, Sparkles } from 'lucide-react';
 
@@ -253,21 +254,47 @@ export const ExportCardModal: React.FC<ExportCardModalProps> = ({ prompt, onClos
     ctx.fillText(categoryText, badgeX + badgeW / 2, badgeY + 25);
     ctx.textAlign = 'left';
 
-    // 3. Dynamic High-Legibility Body Text Auto-Scaling (Fills ~75% of available space!)
+    // Clean prompt title and text
+    const displayTitle = prompt.title.trim();
+    const cleanPromptText = prompt.text.replace(/^["'“`\s]+|["'”`\s]+$/g, '').trim();
+
+    // 3. Dynamic High-Legibility Body Text Auto-Scaling
     const footerH = 80;
     const availableTop = headerY + 60;
     const availableBottom = cardY + cardH - footerH - 40;
     const maxTextH = availableBottom - availableTop;
 
-    let targetPromptFontSize = selectedRatio === 'story' ? 62 : selectedRatio === 'square' ? 48 : 54;
-    let titleFontSize = targetPromptFontSize + 18;
-    let lineHeight = Math.round(targetPromptFontSize * 1.42);
+    let targetPromptFontSize = selectedRatio === 'story' ? 52 : selectedRatio === 'square' ? 42 : 48;
+    let titleFontSize = Math.min(Math.round(targetPromptFontSize * 1.25), 64);
+    let lineHeight = Math.round(targetPromptFontSize * 1.4);
+    let titleGap = 28;
     let promptLines: string[] = [];
+    let titleLines: string[] = [];
 
-    // Auto-scale font size dynamically so it nicely covers up the whole image area!
-    for (let size = targetPromptFontSize; size >= 28; size -= 2) {
+    // Auto-scale font size dynamically so it nicely fits within card canvas
+    for (let size = targetPromptFontSize; size >= 24; size -= 2) {
+      const currentTitleSize = Math.min(Math.round(size * 1.25), 64);
+      const currentTitleLineHeight = Math.round(currentTitleSize * 1.25);
+
+      // Measure title lines
+      ctx.font = `800 ${currentTitleSize}px "Plus Jakarta Sans", -apple-system, sans-serif`;
+      const tWords = displayTitle.split(' ');
+      const tLines: string[] = [];
+      let curTLine = '';
+      for (let i = 0; i < tWords.length; i++) {
+        const testT = curTLine ? `${curTLine} ${tWords[i]}` : tWords[i];
+        if (ctx.measureText(testT).width > contentW && curTLine !== '') {
+          tLines.push(curTLine);
+          curTLine = tWords[i];
+        } else {
+          curTLine = testT;
+        }
+      }
+      if (curTLine) tLines.push(curTLine);
+
+      // Measure body lines
       ctx.font = `600 ${size}px "Plus Jakarta Sans", -apple-system, sans-serif`;
-      const words = prompt.text.split(' ');
+      const words = cleanPromptText.split(' ');
       const lines: string[] = [];
       let currentLine = '';
 
@@ -282,60 +309,53 @@ export const ExportCardModal: React.FC<ExportCardModalProps> = ({ prompt, onClos
       }
       if (currentLine) lines.push(currentLine);
 
-      const calculatedTitleSize = Math.min(Math.round(size * 1.3), 72);
-      const titleBlockH = calculatedTitleSize + 28;
-      const bodyBlockH = lines.length * Math.round(size * 1.42);
-      const totalH = titleBlockH + bodyBlockH + 40;
+      const calculatedTitleBlockH = tLines.length * currentTitleLineHeight;
+      const calculatedBodyBlockH = lines.length * Math.round(size * 1.4);
+      const calculatedTotalH = calculatedTitleBlockH + titleGap + calculatedBodyBlockH;
 
-      if (totalH <= maxTextH || size === 28) {
+      if (calculatedTotalH <= maxTextH || size === 24) {
         targetPromptFontSize = size;
-        titleFontSize = calculatedTitleSize;
-        lineHeight = Math.round(size * 1.42);
+        titleFontSize = currentTitleSize;
+        lineHeight = Math.round(size * 1.4);
+        titleLines = tLines;
         promptLines = lines;
         break;
       }
     }
 
-    // Calculate vertical centering of the text block inside the inner card
-    const titleBlockH = titleFontSize + 28;
+    const titleLineHeight = Math.round(titleFontSize * 1.25);
+    const titleBlockH = titleLines.length * titleLineHeight;
     const bodyBlockH = promptLines.length * lineHeight;
-    const totalBlockH = titleBlockH + bodyBlockH;
+    const totalBlockH = titleBlockH + titleGap + bodyBlockH;
 
-    let startY = availableTop + (maxTextH - totalBlockH) / 2;
-    if (startY < availableTop) startY = availableTop;
+    let startY = availableTop + Math.max(0, (maxTextH - totalBlockH) / 2);
 
-    // Decorative quote mark
-    ctx.fillStyle = theme.accentColor;
-    ctx.font = `800 ${Math.round(titleFontSize * 1.2)}px serif`;
-    ctx.fillText('“', px, startY);
-
-    startY += titleFontSize * 0.7;
+    // Save baseline setting & set top baseline for accurate vertical spacing
+    ctx.textBaseline = 'top';
 
     // Draw Title (Bold & Crisp)
     ctx.fillStyle = theme.textColor;
     ctx.font = `800 ${titleFontSize}px "Plus Jakarta Sans", -apple-system, sans-serif`;
-    ctx.fillText(prompt.title, px, startY);
+    let currentY = startY;
+    for (let i = 0; i < titleLines.length; i++) {
+      ctx.fillText(titleLines[i], px, currentY);
+      currentY += titleLineHeight;
+    }
 
-    startY += titleFontSize + 20;
+    // Add clear separation gap between title and prompt details
+    currentY += titleGap;
 
-    // Draw Divider Line
-    ctx.strokeStyle = theme.accentColor;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(px, startY - 10);
-    ctx.lineTo(px + 100, startY - 10);
-    ctx.stroke();
-
-    startY += 20;
-
-    // Draw Prompt Lines (Large, Highly Legible, Covering Card)
+    // Draw Prompt Lines (Clean, Non-overlapping, High Legibility)
     ctx.fillStyle = theme.textColor;
     ctx.font = `600 ${targetPromptFontSize}px "Plus Jakarta Sans", -apple-system, sans-serif`;
 
     for (let i = 0; i < promptLines.length; i++) {
-      ctx.fillText(promptLines[i], px, startY);
-      startY += lineHeight;
+      ctx.fillText(promptLines[i], px, currentY);
+      currentY += lineHeight;
     }
+
+    // Reset baseline back to standard default
+    ctx.textBaseline = 'alphabetic';
 
     // 4. Subtle, Clean Footer Credit
     const footerY = cardY + cardH - 50;
@@ -376,126 +396,152 @@ export const ExportCardModal: React.FC<ExportCardModalProps> = ({ prompt, onClos
     }, 300);
   };
 
-  if (!prompt) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[94vh] overflow-y-auto">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between pb-4 mb-6 border-b border-[var(--border-subtle)]">
-          <div className="flex items-center gap-2.5">
-            <Sparkles className="w-5 h-5 text-[var(--accent-terracotta)]" />
-            <h3 className="font-serif text-xl font-bold text-[var(--text-main)]">
-              Shareable Prompt Art Card
-            </h3>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
+    <AnimatePresence>
+      {prompt && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[94vh] overflow-y-auto"
           >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 mb-6 border-b border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-5 h-5 text-[var(--accent-terracotta)]" />
+                <h3 className="font-serif text-xl font-bold text-[var(--text-main)]">
+                  Shareable Prompt Art Card
+                </h3>
+              </div>
 
-        {/* Controls: Ratio & Themes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-          {/* Format Ratio */}
-          <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-2 font-semibold">
-              Format Aspect Ratio
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { id: 'story', label: 'Story / Reel (9:16)' },
-                { id: 'post', label: 'Instagram Post (4:5)' },
-                { id: 'square', label: 'Square Post (1:1)' },
-                { id: 'wallpaper', label: 'Landscape (16:9)' },
-              ].map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() => setSelectedRatio(r.id as AspectRatio)}
-                  className={`p-2.5 rounded-xl border text-xs font-medium text-center transition-all cursor-pointer ${
-                    selectedRatio === r.id
-                      ? 'bg-[var(--text-main)] text-[var(--bg-main)] border-[var(--text-main)] font-semibold shadow-xs'
-                      : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-main)]'
-                  }`}
-                >
-                  {r.label}
-                </button>
-              ))}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={onClose}
+                className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </motion.button>
             </div>
-          </div>
 
-          {/* Aesthetic Palette */}
-          <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-2 font-semibold">
-              Color Palette Theme
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
-              {Object.values(THEMES).map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedTheme(t.id)}
-                  className={`p-2 rounded-xl border text-xs font-medium flex items-center gap-2 transition-all cursor-pointer ${
-                    selectedTheme === t.id
-                      ? 'bg-[var(--text-main)] text-[var(--bg-main)] border-[var(--text-main)] font-semibold shadow-xs'
-                      : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-main)]'
-                  }`}
-                >
-                  <span
-                    className="w-3.5 h-3.5 rounded-full shrink-0 border border-black/20"
-                    style={{ backgroundColor: t.bgColor }}
-                  />
-                  <span className="truncate">{t.label}</span>
-                </button>
-              ))}
+            {/* Controls: Ratio & Themes */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+              {/* Format Ratio */}
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-2 font-semibold">
+                  Format Aspect Ratio
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: 'story', label: 'Story / Reel (9:16)' },
+                    { id: 'post', label: 'Instagram Post (4:5)' },
+                    { id: 'square', label: 'Square Post (1:1)' },
+                    { id: 'wallpaper', label: 'Landscape (16:9)' },
+                  ].map((r) => (
+                    <motion.button
+                      key={r.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setSelectedRatio(r.id as AspectRatio)}
+                      className={`p-2.5 rounded-xl border text-xs font-medium text-center transition-all cursor-pointer ${
+                        selectedRatio === r.id
+                          ? 'bg-[var(--text-main)] text-[var(--bg-main)] border-[var(--text-main)] font-semibold shadow-xs'
+                          : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-main)]'
+                      }`}
+                    >
+                      {r.label}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Aesthetic Palette */}
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-2 font-semibold">
+                  Color Palette Theme
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
+                  {Object.values(THEMES).map((t) => (
+                    <motion.button
+                      key={t.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setSelectedTheme(t.id)}
+                      className={`p-2 rounded-xl border text-xs font-medium flex items-center gap-2 transition-all cursor-pointer ${
+                        selectedTheme === t.id
+                          ? 'bg-[var(--text-main)] text-[var(--bg-main)] border-[var(--text-main)] font-semibold shadow-xs'
+                          : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-main)]'
+                      }`}
+                    >
+                      <span
+                        className="w-3.5 h-3.5 rounded-full shrink-0 border border-black/20"
+                        style={{ backgroundColor: t.bgColor }}
+                      />
+                      <span className="truncate">{t.label}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Live Canvas Preview */}
-        <div className="mb-6 overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 flex justify-center">
-          <canvas
-            ref={canvasRef}
-            className="w-full max-w-sm h-auto rounded-xl shadow-xl border border-[var(--border-subtle)] transition-all"
-          />
-        </div>
+            {/* Live Canvas Preview */}
+            <div className="mb-6 overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 flex justify-center">
+              <canvas
+                ref={canvasRef}
+                className="w-full max-w-sm h-auto rounded-xl shadow-xl border border-[var(--border-subtle)] transition-all"
+              />
+            </div>
 
-        {/* Modal Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-[var(--border-subtle)]">
-          <span className="text-xs text-[var(--text-muted)] font-mono">
-            Designed by MahibHasan
-          </span>
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-4 border-t border-[var(--border-subtle)]">
+              <span className="text-xs text-[var(--text-muted)] font-mono">
+                Designed by MahibHasan
+              </span>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-[var(--text-muted)] text-xs font-semibold hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
+              <div className="flex items-center gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={onClose}
+                  className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-[var(--text-muted)] text-xs font-semibold hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
+                >
+                  Cancel
+                </motion.button>
 
-            <button
-              onClick={handleDownload}
-              disabled={isExporting}
-              className="px-6 py-2.5 rounded-xl bg-[var(--text-main)] text-[var(--bg-main)] text-xs font-bold flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-xs"
-            >
-              {downloaded ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-600" />
-                  <span>PNG Card Exported!</span>
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4 text-[var(--accent-terracotta)]" />
-                  <span>{isExporting ? 'Generating PNG...' : 'Download High-Res PNG'}</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={handleDownload}
+                  disabled={isExporting}
+                  className="px-6 py-2.5 rounded-xl bg-[var(--text-main)] text-[var(--bg-main)] text-xs font-bold flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-xs"
+                >
+                  {downloaded ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-600" />
+                      <span>PNG Card Exported!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 text-[var(--accent-terracotta)]" />
+                      <span>{isExporting ? 'Generating PNG...' : 'Download High-Res PNG'}</span>
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

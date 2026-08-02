@@ -29,6 +29,7 @@ export interface DrawingPrompt {
   sourcePromptId?: string;
   isDaily?: boolean;
   dailyDate?: string; // YYYY-MM-DD
+  provider?: string; // AI provider or generator engine name
 }
 
 export interface CategoryItem {

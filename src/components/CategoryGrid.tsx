@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { CATEGORIES } from '../data/categories';
 import { Search, ArrowRight } from 'lucide-react';
 
@@ -64,8 +64,9 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
         {/* Group Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 no-scrollbar">
           {groups.map((group) => (
-            <button
+            <motion.button
               key={group}
+              whileTap={{ scale: 0.94 }}
               onClick={() => setActiveGroup(group)}
               className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 activeGroup === group
@@ -74,53 +75,61 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
               }`}
             >
               {group}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
 
       {/* Category Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredCategories.map((cat) => {
-          const isSelected = selectedCategory === cat.name;
+        <AnimatePresence mode="popLayout">
+          {filteredCategories.map((cat, idx) => {
+            const isSelected = selectedCategory === cat.name;
 
-          return (
-            <motion.div
-              key={cat.id}
-              whileHover={{ y: -4 }}
-              onClick={() => onSelectCategory(cat.name)}
-              className={`editorial-card p-6 cursor-pointer flex flex-col justify-between min-h-[220px] relative group transition-all ${
-                isSelected
-                  ? 'border-[var(--text-main)] shadow-md ring-1 ring-[var(--text-main)]'
-                  : 'border-[var(--border-subtle)] hover:border-[var(--text-main)]'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--accent-terracotta)] font-bold">
-                    {cat.group}
-                  </span>
-                  <span className="text-[10px] font-mono text-[var(--text-muted)]">
-                    № {cat.id.slice(0, 4)}
-                  </span>
+            return (
+              <motion.div
+                layout
+                key={cat.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2, delay: idx * 0.02 }}
+                whileHover={{ y: -4, scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onSelectCategory(cat.name)}
+                className={`editorial-card p-6 cursor-pointer flex flex-col justify-between min-h-[220px] relative group transition-all ${
+                  isSelected
+                    ? 'border-[var(--text-main)] shadow-md ring-1 ring-[var(--text-main)]'
+                    : 'border-[var(--border-subtle)] hover:border-[var(--text-main)]'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--accent-terracotta)] font-bold">
+                      {cat.group}
+                    </span>
+                    <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                      № {cat.id.slice(0, 4)}
+                    </span>
+                  </div>
+
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-[var(--text-main)] mb-2 group-hover:text-[var(--accent-terracotta)] transition-colors">
+                    {cat.name}
+                  </h3>
+
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed line-clamp-3">
+                    {cat.description}
+                  </p>
                 </div>
 
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[var(--text-main)] mb-2 group-hover:text-[var(--accent-terracotta)] transition-colors">
-                  {cat.name}
-                </h3>
-
-                <p className="text-xs text-[var(--text-muted)] leading-relaxed line-clamp-3">
-                  {cat.description}
-                </p>
-              </div>
-
-              <div className="pt-4 mt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs font-semibold text-[var(--text-main)]">
-                <span>Enter Generator</span>
-                <ArrowRight className="w-4 h-4 text-[var(--accent-terracotta)] group-hover:translate-x-1 transition-transform" />
-              </div>
-            </motion.div>
-          );
-        })}
+                <div className="pt-4 mt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs font-semibold text-[var(--text-main)]">
+                  <span>Enter Generator</span>
+                  <ArrowRight className="w-4 h-4 text-[var(--accent-terracotta)] group-hover:translate-x-1 transition-transform" />
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
     </div>
   );

@@ -80,10 +80,16 @@ export const PromptCard: React.FC<PromptCardProps> = ({
       >
         {/* Category Header & Filter Trigger */}
         <div className="flex items-center justify-between pb-6 border-b border-[var(--border-subtle)] mb-8 sm:mb-12">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <span className="text-xs font-mono uppercase tracking-widest text-[var(--accent-terracotta)] font-bold">
               {prompt.category || 'Drawing Prompt'}
             </span>
+            {prompt.provider && (
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)] flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{prompt.provider}</span>
+              </span>
+            )}
             {prompt.remixCount ? (
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
                 Remix v{prompt.remixCount + 1}
@@ -92,62 +98,82 @@ export const PromptCard: React.FC<PromptCardProps> = ({
           </div>
 
           {onOpenFilters && (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onOpenFilters}
               className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] transition-colors cursor-pointer border border-[var(--border-subtle)]"
             >
               <Sliders className="w-3.5 h-3.5" />
               <span>Filters</span>
-            </button>
+            </motion.button>
           )}
         </div>
 
         {/* Hero Editorial Quote Box */}
         <div className="my-auto py-8 sm:py-12 text-center max-w-2xl mx-auto">
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-[var(--text-main)] leading-[1.2] mb-6 tracking-tight">
+          <motion.h2
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-[var(--text-main)] leading-[1.2] mb-6 tracking-tight"
+          >
             {prompt.title}
-          </h2>
+          </motion.h2>
 
-          <blockquote className="font-serif italic text-lg sm:text-2xl text-[var(--text-main)] leading-relaxed tracking-wide opacity-90 my-6">
+          <motion.blockquote
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 0.9, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="font-serif italic text-lg sm:text-2xl text-[var(--text-main)] leading-relaxed tracking-wide opacity-90 my-6"
+          >
             "{prompt.text}"
-          </blockquote>
+          </motion.blockquote>
         </div>
 
         {/* Minimalist Editorial Action Bar */}
         <div className="pt-8 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-4 mt-8">
           {/* Main Controls: Generate Again & Remix */}
           <div className="flex items-center gap-3">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onGenerateAnother}
               disabled={isLoading || isRemixing || isExpanding}
               className="px-6 py-3 rounded-2xl bg-[var(--text-main)] text-[var(--bg-main)] font-semibold text-xs sm:text-sm flex items-center gap-2 hover:opacity-90 transition-all cursor-pointer shadow-sm"
             >
               <Sparkles className="w-4 h-4 text-[var(--accent-terracotta)]" />
               <span>Generate Again</span>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onRemix}
               disabled={isLoading || isRemixing || isExpanding}
               className="px-4 py-3 rounded-2xl bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-subtle)] font-medium text-xs sm:text-sm flex items-center gap-2 hover:bg-[var(--border-subtle)] transition-colors cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRemixing ? 'animate-spin' : ''}`} />
               <span>Remix</span>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onExpand}
               disabled={isLoading || isRemixing || isExpanding}
               className="px-4 py-3 rounded-2xl bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-subtle)] font-medium text-xs sm:text-sm flex items-center gap-2 hover:bg-[var(--border-subtle)] transition-colors cursor-pointer"
             >
               <Maximize2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
               <span className="hidden sm:inline">Expand</span>
-            </button>
+            </motion.button>
           </div>
 
           {/* Social / Saved Utilities */}
           <div className="flex items-center gap-2">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => onToggleFavorite(prompt.id)}
               className={`p-3 rounded-2xl border transition-all cursor-pointer ${
                 prompt.isFavorite
@@ -157,23 +183,27 @@ export const PromptCard: React.FC<PromptCardProps> = ({
               title={prompt.isFavorite ? 'Remove Favorite' : 'Save Favorite'}
             >
               <Heart className={`w-4 h-4 ${prompt.isFavorite ? 'fill-current' : ''}`} />
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.9 }}
               onClick={handleCopy}
               className="p-3 rounded-2xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)] transition-colors cursor-pointer"
               title="Copy text"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => onOpenExport(prompt)}
               className="px-4 py-3 rounded-2xl bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-subtle)] text-xs font-semibold flex items-center gap-2 hover:bg-[var(--border-subtle)] transition-colors cursor-pointer"
             >
               <Share2 className="w-3.5 h-3.5 text-[var(--accent-terracotta)]" />
               <span>Share</span>
-            </button>
+            </motion.button>
           </div>
         </div>
       </motion.div>

@@ -83,26 +83,35 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => onNavigateTab('generator')}
             className="px-5 py-3 rounded-xl bg-[var(--text-main)] text-[var(--bg-main)] text-xs font-semibold flex items-center gap-2 hover:opacity-90 transition-all cursor-pointer shadow-xs"
           >
             <Sparkles className="w-4 h-4 text-[var(--accent-terracotta)]" />
             <span>Generate Prompt</span>
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => onNavigateTab('categories')}
             className="px-4 py-3 rounded-xl bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-subtle)] text-xs font-semibold flex items-center gap-2 hover:bg-[var(--border-subtle)] transition-colors cursor-pointer"
           >
             <Grid className="w-4 h-4 text-[var(--text-muted)]" />
             <span>Categories</span>
-          </button>
+          </motion.button>
         </div>
       </motion.div>
 
       {/* 3. Today's Prompt Spotlight Card */}
       {dailyPrompt && (
-        <section className="space-y-4">
+        <motion.section
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="space-y-4"
+        >
           <div className="flex items-center justify-between">
             <h3 className="font-serif text-xl sm:text-2xl font-bold text-[var(--text-main)]">
               Today's Concept Spotlight
@@ -112,13 +121,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </span>
           </div>
 
-          <div className="editorial-card p-6 sm:p-10 space-y-6">
+          <motion.div
+            whileHover={{ y: -2 }}
+            className="editorial-card p-6 sm:p-10 space-y-6"
+          >
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono uppercase tracking-widest text-[var(--accent-terracotta)] font-bold">
                 {dailyPrompt.category}
               </span>
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => onToggleFavorite(dailyPrompt.id)}
                 className={`p-2.5 rounded-full transition-colors cursor-pointer border ${
                   dailyPrompt.isFavorite
@@ -127,7 +141,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 }`}
               >
                 <Heart className={`w-4 h-4 ${dailyPrompt.isFavorite ? 'fill-current' : ''}`} />
-              </button>
+              </motion.button>
             </div>
 
             <div className="space-y-2">
@@ -140,16 +154,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
 
             <div className="pt-2 flex items-center justify-end">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => onSelectPromptToDraw(dailyPrompt)}
                 className="px-5 py-2.5 rounded-xl bg-[var(--text-main)] text-[var(--bg-main)] text-xs font-semibold flex items-center gap-2 hover:opacity-90 transition-all cursor-pointer"
               >
                 <span>Draw This Concept</span>
                 <ArrowRight className="w-3.5 h-3.5 text-[var(--accent-terracotta)]" />
-              </button>
+              </motion.button>
             </div>
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
       )}
 
       {/* 4. Browse Categories Showcase */}
@@ -174,9 +190,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {topCategories.map((cat) => (
-            <div
+          {topCategories.map((cat, idx) => (
+            <motion.div
               key={cat.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: idx * 0.04 }}
+              whileHover={{ y: -4, scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onSelectCategoryAndGenerate(cat.name)}
               className="editorial-card p-5 cursor-pointer hover:border-[var(--text-main)] transition-all flex flex-col justify-between min-h-[160px] group"
             >
@@ -196,7 +217,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <span>Enter Generator</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform text-[var(--accent-terracotta)]" />
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -222,9 +243,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {(favorites.length > 0 ? favorites.slice(0, 2) : history.slice(0, 2)).map((p) => (
-              <div
+            {(favorites.length > 0 ? favorites.slice(0, 2) : history.slice(0, 2)).map((p, idx) => (
+              <motion.div
                 key={p.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.05 }}
+                whileHover={{ y: -3, scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onSelectPromptToDraw(p)}
                 className="editorial-card p-5 cursor-pointer hover:border-[var(--text-main)] transition-all flex flex-col justify-between space-y-3"
               >
@@ -232,7 +258,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--accent-terracotta)] font-semibold">
                     {p.category}
                   </span>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.8 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       onToggleFavorite(p.id);
@@ -240,7 +268,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     className="p-1 rounded-full text-[var(--text-muted)] hover:text-rose-500"
                   >
                     <Heart className={`w-3.5 h-3.5 ${p.isFavorite ? 'fill-current text-rose-500' : ''}`} />
-                  </button>
+                  </motion.button>
                 </div>
 
                 <div className="space-y-1">
@@ -256,7 +284,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <span>Draw Concept</span>
                   <ArrowRight className="w-3 h-3 text-[var(--accent-terracotta)]" />
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>

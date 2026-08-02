@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { DrawingPrompt } from '../types';
 import { History, Search, Trash2, Copy, Share2, Check, Heart } from 'lucide-react';
 
@@ -97,68 +98,84 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
       {/* History Log */}
       <div className="space-y-4">
-        {filteredHistory.map((item) => (
-          <div
-            key={item.id}
-            className="editorial-card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4"
-          >
-            <div
-              onClick={() => onSelectFromHistory(item)}
-              className="cursor-pointer flex-1 space-y-1.5"
+        <AnimatePresence mode="popLayout">
+          {filteredHistory.map((item) => (
+            <motion.div
+              layout
+              key={item.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ duration: 0.2 }}
+              whileHover={{ y: -2 }}
+              className="editorial-card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--accent-terracotta)] font-bold">
-                  {item.category}
-                </span>
-                <span className="text-[10px] font-mono text-[var(--text-muted)]">
-                  {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+              <div
+                onClick={() => onSelectFromHistory(item)}
+                className="cursor-pointer flex-1 space-y-1.5"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--accent-terracotta)] font-bold">
+                    {item.category}
+                  </span>
+                  <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                    {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+
+                <h4 className="font-serif text-lg font-bold text-[var(--text-main)]">
+                  {item.title}
+                </h4>
+
+                <p className="font-serif italic text-xs text-[var(--text-muted)] line-clamp-2">
+                  "{item.text}"
+                </p>
               </div>
 
-              <h4 className="font-serif text-lg font-bold text-[var(--text-main)]">
-                {item.title}
-              </h4>
+              <div className="flex items-center gap-2 self-end md:self-center pt-2 md:pt-0 border-t md:border-t-0 border-[var(--border-subtle)]">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => onToggleFavorite(item.id)}
+                  title={item.isFavorite ? 'Remove favorite' : 'Save favorite'}
+                  className="p-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-rose-500 border border-[var(--border-subtle)] cursor-pointer"
+                >
+                  <Heart className={`w-3.5 h-3.5 ${item.isFavorite ? 'fill-current text-rose-500' : ''}`} />
+                </motion.button>
 
-              <p className="font-serif italic text-xs text-[var(--text-muted)] line-clamp-2">
-                "{item.text}"
-              </p>
-            </div>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handleCopy(item)}
+                  title="Copy prompt text"
+                  className="p-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)] cursor-pointer"
+                >
+                  {copiedId === item.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                </motion.button>
 
-            <div className="flex items-center gap-2 self-end md:self-center pt-2 md:pt-0 border-t md:border-t-0 border-[var(--border-subtle)]">
-              <button
-                onClick={() => onToggleFavorite(item.id)}
-                title={item.isFavorite ? 'Remove favorite' : 'Save favorite'}
-                className="p-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-rose-500 border border-[var(--border-subtle)] cursor-pointer"
-              >
-                <Heart className={`w-3.5 h-3.5 ${item.isFavorite ? 'fill-current text-rose-500' : ''}`} />
-              </button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => onOpenExport(item)}
+                  title="Export PNG card"
+                  className="p-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)] cursor-pointer"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-[var(--accent-terracotta)]" />
+                </motion.button>
 
-              <button
-                onClick={() => handleCopy(item)}
-                title="Copy prompt text"
-                className="p-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)] cursor-pointer"
-              >
-                {copiedId === item.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
-
-              <button
-                onClick={() => onOpenExport(item)}
-                title="Export PNG card"
-                className="p-2 rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)] cursor-pointer"
-              >
-                <Share2 className="w-3.5 h-3.5 text-[var(--accent-terracotta)]" />
-              </button>
-
-              <button
-                onClick={() => onDeleteHistoryItem(item.id)}
-                title="Delete entry"
-                className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/30 cursor-pointer"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        ))}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => onDeleteHistoryItem(item.id)}
+                  title="Delete entry"
+                  className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/30 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </motion.button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );

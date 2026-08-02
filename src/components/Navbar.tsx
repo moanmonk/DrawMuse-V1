@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { Logo } from './Logo';
 import { ThemeMode } from '../types';
 import {
@@ -46,7 +47,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       <header className="sticky top-0 z-40 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-subtle)] transition-colors duration-300">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Brand Logo */}
-          <div
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => setActiveTab('home')}
             className="flex items-center gap-3 cursor-pointer group select-none"
           >
@@ -56,33 +59,39 @@ export const Navbar: React.FC<NavbarProps> = ({
                 DrawMuse
               </span>
             </div>
-          </div>
+          </motion.div>
 
           {/* Top Right Controls */}
-          <div className="flex items-center gap-2">
-            <button
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
               onClick={toggleTheme}
               title={`Switch theme`}
               className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
             >
               {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-[var(--text-main)]" />}
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
               onClick={openAbout}
               title="About DrawMuse"
               className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
             >
               <Info className="w-4 h-4" />
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
               onClick={openSettings}
               title="Settings"
               className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
             >
               <Settings className="w-4 h-4" />
-            </button>
+            </motion.button>
           </div>
         </div>
       </header>
@@ -94,25 +103,30 @@ export const Navbar: React.FC<NavbarProps> = ({
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
-              <button
+              <motion.button
                 key={item.id}
+                whileTap={{ scale: 0.94 }}
                 onClick={() => setActiveTab(item.id)}
-                className={`relative flex flex-col items-center justify-center py-1.5 px-3 sm:px-5 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer ${
+                className={`relative flex flex-col items-center justify-center py-1.5 px-3 sm:px-5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
                   isActive
-                    ? 'text-[var(--bg-main)] bg-[var(--text-main)] font-semibold shadow-xs scale-102'
+                    ? 'text-[var(--bg-main)] bg-[var(--text-main)] font-semibold shadow-xs'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)]'
                 }`}
               >
                 <div className="relative">
                   <Icon className="w-4 h-4 mb-0.5" />
                   {item.badge !== null && item.badge !== undefined && (
-                    <span className="absolute -top-1.5 -right-2 px-1.5 py-0.2 rounded-full text-[9px] font-mono bg-[var(--accent-terracotta)] text-white font-bold shadow-xs">
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1.5 -right-2 px-1.5 py-0.2 rounded-full text-[9px] font-mono bg-[var(--accent-terracotta)] text-white font-bold shadow-xs"
+                    >
                       {item.badge}
-                    </span>
+                    </motion.span>
                   )}
                 </div>
                 <span className="text-[10px] tracking-tight font-sans font-medium">{item.label}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>

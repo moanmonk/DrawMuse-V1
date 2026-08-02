@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { PromptFilters } from '../types';
 import { X, Sliders, RotateCcw, Check } from 'lucide-react';
 
@@ -19,8 +20,6 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   onReset,
   onApplyAndGenerate,
 }) => {
-  if (!isOpen) return null;
-
   const handleOptionSelect = (key: keyof PromptFilters, val: any) => {
     const currentVal = filters[key];
     const newVal = currentVal === val ? 'Any' : val;
@@ -94,93 +93,119 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[85vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--border-subtle)] shrink-0">
-          <div className="flex items-center gap-2.5">
-            <Sliders className="w-5 h-5 text-[var(--accent-terracotta)]" />
-            <h3 className="font-serif text-xl font-bold text-[var(--text-main)]">
-              Refine Inspiration Filters
-            </h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[85vh] flex flex-col"
           >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--border-subtle)] shrink-0">
+              <div className="flex items-center gap-2.5">
+                <Sliders className="w-5 h-5 text-[var(--accent-terracotta)]" />
+                <h3 className="font-serif text-xl font-bold text-[var(--text-main)]">
+                  Refine Inspiration Filters
+                </h3>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={onClose}
+                className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </motion.button>
+            </div>
 
-        {/* Filter Scroll Container */}
-        <div className="overflow-y-auto space-y-6 pr-1 my-2 grow">
-          {filterSections.map((sec) => (
-            <div key={sec.id}>
-              <label className="block text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-2.5 font-semibold">
-                {sec.label}
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {sec.options.map((opt) => {
-                  const isSelected = filters[sec.key] === opt;
-                  return (
-                    <button
-                      key={opt}
-                      onClick={() => handleOptionSelect(sec.key, opt)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer border ${
-                        isSelected
-                          ? 'bg-[var(--text-main)] text-[var(--bg-main)] border-[var(--text-main)] font-semibold shadow-xs'
-                          : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-main)] hover:border-[var(--text-muted)]'
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  );
-                })}
+            {/* Filter Scroll Container */}
+            <div className="overflow-y-auto space-y-6 pr-1 my-2 grow">
+              {filterSections.map((sec) => (
+                <div key={sec.id}>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-2.5 font-semibold">
+                    {sec.label}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {sec.options.map((opt) => {
+                      const isSelected = filters[sec.key] === opt;
+                      return (
+                        <motion.button
+                          key={opt}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleOptionSelect(sec.key, opt)}
+                          className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer border ${
+                            isSelected
+                              ? 'bg-[var(--text-main)] text-[var(--bg-main)] border-[var(--text-main)] font-semibold shadow-xs'
+                              : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-main)] hover:border-[var(--text-muted)]'
+                          }`}
+                        >
+                          {opt}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {/* Storytelling Toggle */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                <div>
+                  <div className="text-xs font-semibold text-[var(--text-main)]">
+                    Emphasize Narrative Twist
+                  </div>
+                  <div className="text-[11px] text-[var(--text-muted)]">
+                    Weave an unexpected storytelling hook or emotional subtext into the prompt
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={filters.storytelling || false}
+                  onChange={(e) => onChange({ ...filters, storytelling: e.target.checked })}
+                  className="w-4 h-4 accent-[var(--accent-terracotta)] cursor-pointer"
+                />
               </div>
             </div>
-          ))}
 
-          {/* Storytelling Toggle */}
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
-            <div>
-              <div className="text-xs font-semibold text-[var(--text-main)]">
-                Emphasize Narrative Twist
-              </div>
-              <div className="text-[11px] text-[var(--text-muted)]">
-                Weave an unexpected storytelling hook or emotional subtext into the prompt
-              </div>
+            {/* Footer Actions */}
+            <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between shrink-0 gap-3">
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={onReset}
+                className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-semibold flex items-center gap-1.5 hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset All</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => {
+                  onApplyAndGenerate();
+                  onClose();
+                }}
+                className="px-6 py-2.5 rounded-xl bg-[var(--text-main)] text-[var(--bg-main)] text-xs font-semibold flex items-center gap-2 hover:opacity-95 transition-all shadow-md cursor-pointer"
+              >
+                <Check className="w-4 h-4 text-[var(--accent-terracotta)]" />
+                <span>Apply & Generate</span>
+              </motion.button>
             </div>
-            <input
-              type="checkbox"
-              checked={filters.storytelling || false}
-              onChange={(e) => onChange({ ...filters, storytelling: e.target.checked })}
-              className="w-4 h-4 accent-[var(--accent-terracotta)] cursor-pointer"
-            />
-          </div>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between shrink-0 gap-3">
-          <button
-            onClick={onReset}
-            className="px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-semibold flex items-center gap-1.5 hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset All</span>
-          </button>
-
-          <button
-            onClick={() => {
-              onApplyAndGenerate();
-              onClose();
-            }}
-            className="px-6 py-2.5 rounded-xl bg-[var(--text-main)] text-[var(--bg-main)] text-xs font-semibold flex items-center gap-2 hover:opacity-95 transition-all shadow-md cursor-pointer"
-          >
-            <Check className="w-4 h-4 text-[var(--accent-terracotta)]" />
-            <span>Apply & Generate</span>
-          </button>
-        </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
